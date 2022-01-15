@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"net"
 	"runtime"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/rpcxio/rpcx-benchmark/grpc/pb"
 	"github.com/smallnest/rpcx/log"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
@@ -39,7 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
-	s := grpc.NewServer()
+	s := grpc.NewServer(grpc.NumStreamWorkers(1))
 
 	pb.RegisterHelloServer(s, &Hello{})
 	s.Serve(lis)

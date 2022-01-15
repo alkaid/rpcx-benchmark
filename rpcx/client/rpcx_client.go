@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	concurrency = flag.Int("c", 1, "concurrency")
-	total       = flag.Int("n", 10000, "total requests for all clients")
+	concurrency = flag.Int("c", 1000, "concurrency")
+	total       = flag.Int("n", 1000000, "total requests for all clients")
 	host        = flag.String("s", "127.0.0.1:8972", "server ip and port")
-	pool        = flag.Int("pool", 10, "shared rpcx clients")
+	pool        = flag.Int("pool", 2, "shared rpcx clients")
 	rate        = flag.Int("r", 0, "throughputs")
 )
 
@@ -36,7 +36,10 @@ func main() {
 	n := *concurrency
 	// 每个客户端需要发送的请求数
 	m := *total / n
-	log.Infof("concurrency: %d\nrequests per client: %d\n\n", n, m)
+	// 每个client负载的请求数
+	k := *total / (*pool)
+	log.Infof("concurrency: %d  requests per goruntine: %d\n", n, m)
+	log.Infof("pool: %d  requests per client: %d\n", *pool, k)
 
 	// 创建服务端的信息
 	servers := strings.Split(*host, ",")
@@ -44,7 +47,7 @@ func main() {
 	for _, server := range servers {
 		serverPeers = append(serverPeers, &client.KVPair{Key: server})
 	}
-	log.Infof("Servers: %+v\n\n", *host)
+	log.Infof("Servers: %+v\n", *host)
 
 	servicePath := "Hello"
 	serviceMethod := "Say"
